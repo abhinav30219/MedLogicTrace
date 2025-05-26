@@ -1,0 +1,9 @@
+model,model_type,dataset,accuracy,avg_tokens,total_examples,generation_failures,gpu_id,timestamp
+Qwen/Qwen2.5-1.5B,base-1.5B,medmcqa,0.64,30.488,500,0,2,2025-05-26T04:42:57.334356
+Qwen/Qwen2.5-1.5B,base-1.5B,pubmed_qa,0.556,12.51,500,0,2,2025-05-26T04:45:27.748148
+Qwen/Qwen2.5-0.5B,base-0.5B,medmcqa,0.76,50.428,500,0,0,2025-05-26T04:45:08.026514
+Qwen/Qwen2.5-0.5B,base-0.5B,pubmed_qa,0.51,9.418,500,0,0,2025-05-26T04:46:44.181840
+Qwen/Qwen2.5-0.5B-Instruct,instruct-0.5B,medmcqa,0.83,63.968,500,0,1,2025-05-26T04:47:58.230407
+Qwen/Qwen2.5-0.5B-Instruct,instruct-0.5B,pubmed_qa,0.856,63.978,500,0,1,2025-05-26T04:58:12.363026
+Qwen/Qwen2.5-1.5B-Instruct,instruct-1.5B,medmcqa,0.822,63.976,500,0,3,2025-05-26T04:48:46.715676
+Qwen/Qwen2.5-1.5B-Instruct,instruct-1.5B,pubmed_qa,0.816,63.984,500,0,3,2025-05-26T05:00:16.089786

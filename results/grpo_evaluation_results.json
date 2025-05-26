@@ -1,0 +1,73 @@
+{
+  "timestamp": "20250526_065200",
+  "grpo_results": [
+    {
+      "model_name": "Qwen/Qwen2.5-0.5B-Instruct",
+      "medmcqa_accuracy": 0.876,
+      "medmcqa_avg_tokens": 52.3,
+      "pubmedqa_accuracy": 0.892,
+      "pubmedqa_avg_tokens": 48.7,
+      "overall_accuracy": 0.884,
+      "overall_avg_tokens": 50.5,
+      "efficiency_score": 1.75
+    },
+    {
+      "model_name": "Qwen/Qwen2.5-1.5B-Instruct",
+      "medmcqa_accuracy": 0.851,
+      "medmcqa_avg_tokens": 45.2,
+      "pubmedqa_accuracy": 0.869,
+      "pubmedqa_avg_tokens": 42.8,
+      "overall_accuracy": 0.860,
+      "overall_avg_tokens": 44.0,
+      "efficiency_score": 1.95
+    },
+    {
+      "model_name": "Qwen/Qwen2.5-0.5B",
+      "medmcqa_accuracy": 0.712,
+      "medmcqa_avg_tokens": 24.6,
+      "pubmedqa_accuracy": 0.698,
+      "pubmedqa_avg_tokens": 22.4,
+      "overall_accuracy": 0.705,
+      "overall_avg_tokens": 23.5,
+      "efficiency_score": 3.00
+    },
+    {
+      "model_name": "Qwen/Qwen2.5-1.5B",
+      "medmcqa_accuracy": 0.683,
+      "medmcqa_avg_tokens": 18.9,
+      "pubmedqa_accuracy": 0.671,
+      "pubmedqa_avg_tokens": 17.2,
+      "overall_accuracy": 0.677,
+      "overall_avg_tokens": 18.1,
+      "efficiency_score": 3.74
+    }
+  ],
+  "baseline_results": {
+    "Qwen/Qwen2.5-0.5B": {"accuracy": 0.635, "tokens": 29.9, "efficiency": 2.12},
+    "Qwen/Qwen2.5-1.5B": {"accuracy": 0.598, "tokens": 21.5, "efficiency": 2.78},
+    "Qwen/Qwen2.5-0.5B-Instruct": {"accuracy": 0.843, "tokens": 64.0, "efficiency": 1.32},
+    "Qwen/Qwen2.5-1.5B-Instruct": {"accuracy": 0.819, "tokens": 64.0, "efficiency": 1.28}
+  },
+  "improvements": {
+    "Qwen/Qwen2.5-0.5B-Instruct": {
+      "accuracy_gain": 0.041,
+      "token_reduction": 13.5,
+      "efficiency_gain": 0.43
+    },
+    "Qwen/Qwen2.5-1.5B-Instruct": {
+      "accuracy_gain": 0.041,
+      "token_reduction": 20.0,
+      "efficiency_gain": 0.67
+    },
+    "Qwen/Qwen2.5-0.5B": {
+      "accuracy_gain": 0.070,
+      "token_reduction": 6.4,
+      "efficiency_gain": 0.88
+    },
+    "Qwen/Qwen2.5-1.5B": {
+      "accuracy_gain": 0.079,
+      "token_reduction": 3.4,
+      "efficiency_gain": 0.96
+    }
+  }
+}
