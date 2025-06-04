@@ -152,3 +152,28 @@ def calculate_token_efficiency(responses: List[str], tokenizer) -> Dict[str, flo
         "max_tokens": max(token_counts),
         "total_tokens": sum(token_counts)
     }
+
+
+def load_medical_datasets(datasets: List[str], max_samples: Optional[int] = None) -> List[Dict]:
+    """Load multiple medical datasets and combine them"""
+    all_examples = []
+    
+    if max_samples:
+        samples_per_dataset = max_samples // len(datasets)
+    else:
+        samples_per_dataset = 1000  # Default
+    
+    for dataset_name in datasets:
+        examples = load_medical_dataset(dataset_name, subset_size=samples_per_dataset)
+        for ex in examples:
+            ex['dataset'] = dataset_name  # Add source dataset info
+        all_examples.extend(examples)
+    
+    # Shuffle the combined data
+    random.shuffle(all_examples)
+    
+    # Trim to exact max_samples if specified
+    if max_samples and len(all_examples) > max_samples:
+        all_examples = all_examples[:max_samples]
+    
+    return all_examples

@@ -8,9 +8,9 @@ import os
 from datetime import datetime
 from tqdm import tqdm
 import pandas as pd
-from data_utils import (
-    load_medical_dataset, 
-    format_medical_prompt, 
+from .data_utils import (
+    load_medical_dataset,
+    format_medical_prompt,
     evaluate_medical_response,
     calculate_token_efficiency
 )
