@@ -12,7 +12,6 @@ from tqdm import tqdm
 import json
 import os
 from torch.utils.tensorboard import SummaryWriter
-from torchviz import make_dot
 
 from .logictrace_optimizer import LogicTraceOptimizer, LogicTraceGRPOReward
 from .grpo_trainer import MedLogicGRPOTrainer
@@ -176,7 +175,6 @@ class LogicTraceGRPOTrainer(MedLogicGRPOTrainer):
             loss = policy_loss + entropy_loss
         else:
             # Standard GRPO loss
-            print(log_probs, advantages)
             loss = -(log_probs * advantages).mean()
         
         return loss
