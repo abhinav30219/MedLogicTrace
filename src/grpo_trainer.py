@@ -62,52 +62,30 @@ class MedLogicGRPOTrainer:
         # Enable gradient checkpointing for memory efficiency
         # self.model.gradient_checkpointing_enable()
     
-    def compute_advantages(
-        self,
-        rewards: torch.Tensor,
-        values: Optional[torch.Tensor] = None,
-        normalize: bool = True
-    ) -> torch.Tensor:
+    def compute_advantages(self, rewards: torch.Tensor) -> torch.Tensor:
         """
         Compute advantages for policy gradient updates.
         
         Args:
             rewards: Tensor of shape (batch_size, k_samples) containing rewards
-            values: Optional tensor of shape (batch_size, k_samples) containing value estimates
-            normalize: Whether to normalize advantages
             
         Returns:
             Tensor of advantages with same shape as rewards
         """
         # Ensure rewards are on the correct device and require gradients
-        rewards = rewards.to(self.device).detach()  # Detach rewards as they don't need gradients
+        rewards = rewards.to(self.device).detach().view(-1, self.k_samples)
         
-        # If no value estimates provided, use mean reward as baseline
-        if values is None:
-            # Compute mean reward per prompt (across k_samples)
-            baseline = rewards.mean(dim=1, keepdim=True)
-        else:
-            # Ensure values are on the correct device
-            baseline = values.to(self.device).detach()  # Detach values as they don't need gradients
+        # Normalize within each group with safety checks
+        mean = rewards.mean(dim=1, keepdim=True)
+        std = rewards.std(dim=1, keepdim=True)
         
-        # Compute advantages: R - V(s)
-        advantages = rewards - baseline
+        # Prevent division by zero
+        std = torch.maximum(std, torch.tensor(1e-10).to(self.device))
         
-        # Apply discounting if gamma < 1
-        if self.gamma < 1.0:
-            # Create discount factors: [1, gamma, gamma^2, ...]
-            discount_factors = torch.pow(
-                self.gamma,
-                torch.arange(advantages.size(1), device=self.device)
-            ).view(1, -1)
-            advantages = advantages * discount_factors
+        advantages = (rewards - mean) / std
         
-        # Normalize advantages if requested
-        if normalize:
-            # Compute mean and std across all advantages
-            mean = advantages.mean()
-            std = advantages.std() + 1e-8  # Add small epsilon for numerical stability
-            advantages = (advantages - mean) / std
+        # Clamp advantages to prevent extreme values
+        advantages = torch.clamp(advantages, min=-10.0, max=10.0)
         
         return advantages.detach()  # Detach final advantages as they are used as constants in loss computation
     
