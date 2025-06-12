@@ -12,12 +12,13 @@ from tqdm import tqdm
 import json
 import os
 from torch.utils.tensorboard import SummaryWriter
+from torchviz import make_dot
 
 from .logictrace_optimizer import LogicTraceOptimizer, LogicTraceGRPOReward
-from .grpo_trainer import GRPOTrainer
+from .grpo_trainer import MedLogicGRPOTrainer
 
 
-class LogicTraceGRPOTrainer(GRPOTrainer):
+class LogicTraceGRPOTrainer(MedLogicGRPOTrainer):
     """
     Enhanced GRPO trainer with LogicTrace optimization for token-efficient reasoning.
     """
@@ -175,6 +176,7 @@ class LogicTraceGRPOTrainer(GRPOTrainer):
             loss = policy_loss + entropy_loss
         else:
             # Standard GRPO loss
+            print(log_probs, advantages)
             loss = -(log_probs * advantages).mean()
         
         return loss
@@ -210,7 +212,8 @@ class LogicTraceGRPOTrainer(GRPOTrainer):
                 # Generate with dynamic temperature
                 inputs = self.tokenizer(prompt, return_tensors="pt").to(self.device)
                 
-                with torch.no_grad():
+                # Forward pass with gradient tracking
+                with torch.set_grad_enabled(True):
                     outputs = self.model.generate(
                         **inputs,
                         max_length=max_length,
@@ -220,32 +223,38 @@ class LogicTraceGRPOTrainer(GRPOTrainer):
                         return_dict_in_generate=True,
                         output_scores=True
                     )
+                    
+                    # Calculate log probabilities with gradient tracking
+                    if self.token_level_rewards and self.use_dapo_enhancements:
+                        transition_scores = self.model.compute_transition_scores(
+                            outputs.sequences,
+                            outputs.scores,
+                            normalize_logits=True
+                        )
+                        log_prob = transition_scores.sum()
+                    else:
+                        # Get logits from the model with gradient tracking
+                        logits = self.model(**inputs).logits
+                        # Compute log probabilities
+                        log_prob = F.log_softmax(logits, dim=-1)
+                        # Take mean over sequence length
+                        log_prob = log_prob.mean()
                 
                 response = self.tokenizer.decode(
                     outputs.sequences[0][inputs.input_ids.shape[1]:],
                     skip_special_tokens=True
                 )
                 responses.append(response)
-                
-                # Calculate log probabilities
-                if self.token_level_rewards and self.use_dapo_enhancements:
-                    # Token-level log probabilities for finer control
-                    transition_scores = self.model.compute_transition_scores(
-                        outputs.sequences,
-                        outputs.scores,
-                        normalize_logits=True
-                    )
-                    log_prob = transition_scores.sum()
-                else:
-                    # Sequence-level log probability
-                    log_prob = torch.tensor(0.0)  # Placeholder
-                
                 log_probs.append(log_prob)
-            
+                   
             all_responses.append(responses)
             all_log_probs.append(torch.stack(log_probs))
         
-        return all_responses, torch.stack(all_log_probs)
+        # Stack all log probabilities and ensure they require gradients
+        stacked_log_probs = torch.stack(all_log_probs)
+        stacked_log_probs.requires_grad_(True)
+        
+        return all_responses, stacked_log_probs
     
     def train_on_batch(
         self,
@@ -256,6 +265,9 @@ class LogicTraceGRPOTrainer(GRPOTrainer):
         """
         Train on a batch with LogicTrace optimization.
         """
+        # Set model to training mode
+        self.model.train()
+        
         # Generate K responses per prompt
         responses_per_prompt, log_probs = self.generate_k_responses(prompts)
         
