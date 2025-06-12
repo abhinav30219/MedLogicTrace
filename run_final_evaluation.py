@@ -37,7 +37,7 @@ def evaluate_baseline_model(
     if device == "cuda":
         model = model.cuda()
     
-    evaluator = MedicalEvaluator(tokenizer)
+    evaluator = MedicalEvaluator(model_name, device)
     results = []
     
     for item in tqdm(test_data, desc="Baseline evaluation"):
@@ -58,7 +58,7 @@ def evaluate_baseline_model(
             skip_special_tokens=True
         )
         
-        eval_result = evaluator.evaluate_response(item['question'], response)
+        eval_result = evaluator.evaluate_dataset(item['question'], response)
         eval_result['model'] = 'baseline'
         results.append(eval_result)
     

@@ -49,11 +49,12 @@ def prepare_grpo_data(dataset, tokenizer, max_length: int = 512) -> List[Dict]:
 def load_medical_dataset(dataset_name: str, subset_size: int = 1000) -> List[Dict]:
     """Load medical evaluation datasets"""
     print(f"Loading {dataset_name}...")
+
+    examples = []
     
     if dataset_name == "medmcqa":
         dataset = load_dataset("openlifescienceai/medmcqa", split="validation")
         # Format: question with multiple choice
-        examples = []
         for item in dataset:
             if len(examples) >= subset_size:
                 break
@@ -71,7 +72,6 @@ def load_medical_dataset(dataset_name: str, subset_size: int = 1000) -> List[Dic
     elif dataset_name == "medqa":
         # MedQA USMLE dataset
         dataset = load_dataset("GBaker/MedQA-USMLE-4-options", split="test")
-        examples = []
         for item in dataset:
             if len(examples) >= subset_size:
                 break
@@ -83,9 +83,8 @@ def load_medical_dataset(dataset_name: str, subset_size: int = 1000) -> List[Dic
                 "full_question": item["question"]
             })
     
-    elif dataset_name == "pubmed_qa":
+    elif dataset_name == "pubmedqa":
         dataset = load_dataset("qiaojin/PubMedQA", "pqa_labeled", split="train")
-        examples = []
         for item in dataset:
             if len(examples) >= subset_size:
                 break
@@ -145,6 +144,14 @@ def calculate_token_efficiency(responses: List[str], tokenizer) -> Dict[str, flo
     for response in responses:
         tokens = tokenizer.encode(response)
         token_counts.append(len(tokens))
+    
+    if len(token_counts) == 0:
+        return {
+            "avg_tokens": 0,
+            "min_tokens": 0,
+            "max_tokens": 0,
+            "total_tokens": 0
+        }
     
     return {
         "avg_tokens": sum(token_counts) / len(token_counts),
